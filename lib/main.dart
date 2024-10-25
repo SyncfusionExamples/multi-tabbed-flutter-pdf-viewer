@@ -50,6 +50,9 @@ class _PdfTabViewState extends State<PdfTabView> with TickerProviderStateMixin {
     _openedFiles = <PdfFile>[];
     // Initialize the TabController
     _tabController = TabController(length: _openedFiles.length, vsync: this);
+
+    // Load a default PDF file. You can remove this line to open a PDF file manually
+    _loadADefaultPdf();
     super.initState();
   }
 
@@ -59,6 +62,20 @@ class _PdfTabViewState extends State<PdfTabView> with TickerProviderStateMixin {
     // Dispose the TabController
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Load a default PDF file when the app is launched (optional)
+  Future<void> _loadADefaultPdf() async {
+    final ByteData data = await rootBundle.load('assets/GIS Succinctly.pdf');
+    final Uint8List bytes = data.buffer.asUint8List();
+    setState(() {
+      _openedFiles.add(PdfFile('GIS Succinctly', bytes, GlobalKey()));
+      _tabController = TabController(
+        length: _openedFiles.length,
+        vsync: this,
+        initialIndex: _openedFiles.length - 1,
+      );
+    });
   }
 
   @override
@@ -122,7 +139,7 @@ class _PdfTabViewState extends State<PdfTabView> with TickerProviderStateMixin {
                     size: const Size.square(24),
                     child: IconButton(
                       onPressed: () {
-                        _removeTab(_tabController.index);
+                        _removeTab(_openedFiles.indexOf(file));
                       },
                       icon: const Icon(Icons.close),
                       iconSize: 20,
